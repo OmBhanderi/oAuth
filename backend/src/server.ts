@@ -1,12 +1,12 @@
 import { AppDataSource } from "./config/data-source";
 import { Request, Response } from "express";
 import authRoutes from "./modules/auth/auth.routes";
-
+import express from "express";
+import cors from "cors";
 import passport from "./config/passport";
 import "dotenv/config";
 
-const express = require("express");
-const cors = require("cors");
+
 const app = express();
 
 const PORT = process.env.PORT;

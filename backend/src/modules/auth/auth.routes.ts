@@ -2,12 +2,14 @@ import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import Passport from "../../config/passport";
 import jwt, { SignOptions } from "jsonwebtoken";
+import { validate } from "../../middleware/validate.middleware";
+import { loginSchema, signupSchema } from "./auth.validation";
 
 const router = Router();
 
-router.post("/signup", AuthController.signup);
+router.post("/signup", validate(signupSchema), AuthController.signup);
 
-router.post("/login", AuthController.login);
+router.post("/login", validate(loginSchema), AuthController.login);
 
 router.get(
   "/google",
@@ -17,18 +19,7 @@ router.get(
 router.get(
   "/google/callback",
   Passport.authenticate("google", { session: false }),
-  (req, res) => {
-    const user = req.user;
-
-    // generate JWT here
-    const token = jwt.sign(
-      { user: user },
-      process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions,
-    );
-
-    res.redirect(`http://localhost:3000/login/oauth-success?token=${token}`);
-  },
+  AuthController.googleAuthSuccess,
 );
 
 export default router;

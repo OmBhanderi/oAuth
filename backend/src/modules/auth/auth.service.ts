@@ -2,14 +2,14 @@ import { AppDataSource } from "../../config/data-source";
 import { Users } from "../../entities/user.entity";
 import { SignupDTO, LoginDTO } from "./auth.dto";
 import bcrypt from "bcrypt";
-import jwt, { SignOptions } from "jsonwebtoken";
 import "dotenv/config";
+import { signToken } from "../../utils/jwt.utils";
 
 const userRepository = AppDataSource.getRepository(Users);
 
 export class AuthService {
   static async signup(data: SignupDTO) {
-    const {name, email, password } = data;
+    const { name, email, password } = data;
 
     const existingUser = await userRepository.findOne({
       where: { email },
@@ -29,11 +29,7 @@ export class AuthService {
 
     await userRepository.save(user);
 
-    const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions,
-    );
+    const token = signToken({ userId: user.id });
 
     return { email, token };
   }
@@ -44,7 +40,6 @@ export class AuthService {
     const user = await userRepository.findOne({
       where: { email },
     });
-    
 
     if (!user) {
       throw new Error("Invalid credentials");
@@ -56,11 +51,7 @@ export class AuthService {
       throw new Error("Invalid credentials");
     }
 
-    const token = jwt.sign(
-      { userId: user.id },
-      process.env.JWT_SECRET as string,
-      { expiresIn: process.env.JWT_EXPIRES_IN } as SignOptions,
-    );
+    const token = signToken({ userId: user.id });
 
     return { email, token };
   }
