@@ -40,7 +40,7 @@ export function SignupForm({
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
 
     if (formData.password !== formData.confirmPassword) {
@@ -53,10 +53,10 @@ export function SignupForm({
         name:formData.name,
         email: formData.email,
         password: formData.password,
+        confirmpassword :formData.confirmPassword
       });
 
       router.push("/dashboard");
-      console.log("Signup successful");
     } catch (error) {
       console.error("Signup failed", error);
     }
@@ -127,7 +127,7 @@ export function SignupForm({
                 </Field>
 
                 <FieldDescription>
-                  Must be at least 8 characters long.
+                  Must be at least 6 characters long.
                 </FieldDescription>
               </Field>
 

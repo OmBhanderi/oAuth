@@ -10,7 +10,6 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "dependencies": {
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",

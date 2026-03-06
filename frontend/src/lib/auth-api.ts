@@ -4,8 +4,8 @@ export const signup = async (data: {
   name:string
   email: string
   password: string
+  confirmpassword:string
 }) => {
-  console.log("data",data)
   const response = await api.post("/auth/signup", data)
   return response.data
 }

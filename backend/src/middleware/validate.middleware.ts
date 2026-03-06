@@ -10,7 +10,7 @@ export const validate =
     } catch (error: any) {
       return res.status(400).json({
         message: "Validation failed",
-        errors: error.errors,
+        errors: error,
       });
     }
   };
