@@ -1,7 +1,7 @@
 import passport from "passport";
 import { Strategy as GoogleStrategy } from "passport-google-oauth20";
 import { AppDataSource } from "../config/data-source";
-import { Users } from "../modules/auth/user.entity";
+import { Users } from "../entities/user.entity";
 
 const userRepository = AppDataSource.getRepository(Users);
 
@@ -23,6 +23,7 @@ passport.use(
             email: profile.emails?.[0].value,
             name: profile.displayName,
             googleId: profile.id,
+            provider: profile.provider
           });
 
           await userRepository.save(user);

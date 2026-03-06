@@ -1,5 +1,5 @@
 import { AppDataSource } from "../../config/data-source";
-import { Users } from "./user.entity";
+import { Users } from "../../entities/user.entity";
 import { SignupDTO, LoginDTO } from "./auth.dto";
 import bcrypt from "bcrypt";
 import jwt, { SignOptions } from "jsonwebtoken";
