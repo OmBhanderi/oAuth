@@ -16,6 +16,10 @@ export class AuthService {
     });
 
     if (existingUser) {
+      // if user exists via oauth method alert user accordingly
+      if (existingUser.provider && existingUser.provider !== "local") {
+        throw new Error("User already exists. Please login with Google.");
+      }
       throw new Error("User already exists");
     }
 
@@ -42,13 +46,19 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new Error("Invalid credentials");
+      // user not found at all
+      throw new Error("Email not found");
+    }
+
+    // user has no password because they registered via Google
+    if (!user.password) {
+      throw new Error("Please login with Google");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
 
     if (!isMatch) {
-      throw new Error("Invalid credentials");
+      throw new Error("Password incorrect");
     }
 
     const token = signToken({ userId: user.id });

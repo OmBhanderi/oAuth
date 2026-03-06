@@ -1,9 +1,9 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 
-export default function OAuthSuccess() {
+function OAuthSuccessContent() {
   const params = useSearchParams();
 
   useEffect(() => {
@@ -13,7 +13,15 @@ export default function OAuthSuccess() {
       localStorage.setItem("token", token);
       window.location.href = "/dashboard";
     }
-  }, []);
+  }, [params]);
 
   return <p>Logging you in...</p>;
+}
+
+export default function OAuthSuccess() {
+  return (
+    <Suspense fallback={<p>Loading...</p>}>
+      <OAuthSuccessContent />
+    </Suspense>
+  );
 }

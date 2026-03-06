@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -20,45 +21,40 @@ import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { signup } from "@/lib/auth-api";
 import { useRouter } from "next/navigation";
+import { signupSchema, SignupFormData } from "@/types/auth";
+import { useState } from "react";
 
 export function SignupForm({
   className,
   ...props
 }: React.ComponentProps<"div">) {
   const router = useRouter();
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<SignupFormData>({
+    resolver: zodResolver(signupSchema),
   });
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.id]: e.target.value,
-    });
-  };
-
-  const handleSubmit = async (e: React.SubmitEvent) => {
-    e.preventDefault();
-
-    if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
-      return;
-    }
-
+  const onSubmit = async (data: SignupFormData) => {
+    setServerError(null);
     try {
-      await signup({
-        name:formData.name,
-        email: formData.email,
-        password: formData.password,
-        confirmpassword :formData.confirmPassword
+      const res = await signup({
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        confirmpassword: data.confirmpassword,
       });
-
+      if (!res.success) {
+        setServerError(res.message);
+        return;
+      }
       router.push("/dashboard");
-    } catch (error) {
-      console.error("Signup failed", error);
+    } catch (err: any) {
+      console.error("Signup failed", err);
+      setServerError(err.response?.data?.message || err.message || "An error occurred");
     }
   };
 
@@ -73,7 +69,7 @@ export function SignupForm({
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit}>
+          <form onSubmit={handleSubmit(onSubmit)}>
             <FieldGroup>
               <Field>
                 {" "}
@@ -82,10 +78,11 @@ export function SignupForm({
                   id="name"
                   type="text"
                   placeholder="John Doe"
-                  onChange={handleChange}
-                  required
-                  value={formData.name}
+                  {...register("name")}
                 />
+                {errors.name && (
+                  <p className="text-red-500 text-sm">{errors.name.message}</p>
+                )}
               </Field>
               <Field>
                 <FieldLabel htmlFor="email">Email</FieldLabel>
@@ -93,38 +90,45 @@ export function SignupForm({
                   id="email"
                   type="email"
                   placeholder="m@example.com"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
+                  {...register("email")}
                 />
+                {errors.email && (
+                  <p className="text-red-500 text-sm">{errors.email.message}</p>
+                )}
               </Field>
 
               <Field>
-                <Field className="grid grid-cols-2 gap-4">
-                  <Field>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
                     <FieldLabel htmlFor="password">Password</FieldLabel>
                     <Input
                       id="password"
                       type="password"
-                      required
-                      value={formData.password}
-                      onChange={handleChange}
+                      {...register("password")}
                     />
-                  </Field>
+                    {errors.password && (
+                      <p className="text-red-500 text-sm">
+                        {errors.password.message}
+                      </p>
+                    )}
+                  </div>
 
-                  <Field>
-                    <FieldLabel htmlFor="confirmPassword">
+                  <div>
+                    <FieldLabel htmlFor="confirmpassword">
                       Confirm Password
                     </FieldLabel>
                     <Input
-                      id="confirmPassword"
+                      id="confirmpassword"
                       type="password"
-                      required
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
+                      {...register("confirmpassword")}
                     />
-                  </Field>
-                </Field>
+                    {errors.confirmpassword && (
+                      <p className="text-red-500 text-sm">
+                        {errors.confirmpassword.message}
+                      </p>
+                    )}
+                  </div>
+                </div>
 
                 <FieldDescription>
                   Must be at least 6 characters long.
@@ -132,7 +136,12 @@ export function SignupForm({
               </Field>
 
               <Field>
-                <Button type="submit">Create Account</Button>
+                {serverError && (
+                  <p className="text-red-500 text-sm text-center">{serverError}</p>
+                )}
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting ? "Creating Account..." : "Create Account"}
+                </Button>
 
                 <FieldDescription className="text-center">
                   Already have an account? <Link href="/login">Log In</Link>
